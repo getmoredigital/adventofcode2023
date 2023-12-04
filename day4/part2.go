@@ -1,5 +1,7 @@
 package day4
 
+import "fmt"
+
 func countInstances(games []Game) []int {
 	n := len(games)
 	if n == 0 {
@@ -18,4 +20,11 @@ func countInstances(games []Game) []int {
 	}
 
 	return instances
+}
+
+func printInstances(games []Game) {
+	instances := countInstances(games)
+	for i,game  := range games {
+		fmt.Printf("Game %s: %d instances\n", game.Id, instances[i])
+	}
 }
