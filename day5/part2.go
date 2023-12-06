@@ -1,20 +1,19 @@
 package day5
 
-import (
-	"errors"
-)
-
-func createRanges(rawIds []int) ([]Span, error) {
-	if len(rawIds)%2 != 0 {
-		return nil, errors.New("the length of the slice is not even")
+func findLowestLocFromRange(start int, length int, convertMetrics map[string][]ConvertMetric, c chan int) {
+	seedRange := make([]int, length)
+	for i := 0; i < length; i++ {
+		seedRange[i] = start + i
 	}
 
-	var all []Span
-
-	for i := 0; i < len(rawIds); i += 2 {
-		end := rawIds[i] + rawIds[i+1]
-		all = append(all, Span{Start: rawIds[i], End: end})
+	seeds := makeSeeds(seedRange, convertMetrics)
+	var lowest Seed
+	for _, seed := range seeds {
+		if seed.Location < lowest.Location || lowest == (Seed{}) {
+			lowest = seed
+		}
 	}
 
-	return all, nil
+	c <- lowest.Location
+
 }

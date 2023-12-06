@@ -21,8 +21,9 @@ type Seed struct {
 }
 
 type Span struct {
-	Start int
-	End   int
+	Start  int
+	End    int
+	Length int
 }
 
 type ConvertMetric struct {
@@ -81,6 +82,8 @@ func parseData(filepath string) ([]int, map[string][]ConvertMetric) {
 					case 2:
 						target.End = target.Start + num
 						transformer.End = transformer.Start + num
+						target.Length = num
+						transformer.Length = num
 						metric := ConvertMetric{Target: target, Transformer: transformer}
 						convertMetrics[currentMap] = append(convertMetrics[currentMap], metric)
 					}
@@ -111,8 +114,7 @@ func PrintConvertMetrics(convertMetrics map[string][]ConvertMetric) {
 	}
 }
 
-
-func transformItem( source int, metrics []ConvertMetric) int {
+func transformItem(source int, metrics []ConvertMetric) int {
 	for _, metric := range metrics {
 		if source >= metric.Transformer.Start && source < metric.Transformer.End {
 			diff := source - metric.Transformer.Start
@@ -123,7 +125,7 @@ func transformItem( source int, metrics []ConvertMetric) int {
 	return source
 }
 
-func makeSeeds(ids []int,convertMetrics map[string][]ConvertMetric ) []Seed {
+func makeSeeds(ids []int, convertMetrics map[string][]ConvertMetric) []Seed {
 	var seeds []Seed
 	for _, id := range ids {
 		seed := Seed{Id: id}
@@ -154,7 +156,7 @@ func makeSeeds(ids []int,convertMetrics map[string][]ConvertMetric ) []Seed {
 }
 
 func Main() {
-	seedIds, convertMetrics := parseData("day5/sample.txt")
+	seedIds, convertMetrics := parseData("day5/day5.txt")
 	seeds := makeSeeds(seedIds, convertMetrics)
 	var lowest Seed
 	for _, seed := range seeds {
@@ -163,7 +165,21 @@ func Main() {
 		}
 	}
 	fmt.Println("The lowest location is", lowest.Location)
-	if seedIdRanges, err := createRanges(seedIds); err == nil {
-		//
+
+	if len(seedIds)%2 == 0 {
+		results := make(chan int, len(seedIds)/2)
+
+		for i := 0; i < len(seedIds); i += 2 {
+			go findLowestLocFromRange(seedIds[i], seedIds[i+1], convertMetrics, results)
+		}
+
+		for i := 0; i < len(seedIds); i += 2 {
+			fmt.Printf("Result %d: %d\n", i+1, <-results)
+		}
+
+		// Close the channel
+		close(results)
+
 	}
+
 }
