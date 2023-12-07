@@ -7,6 +7,7 @@ import (
 	"getmoredigital/adventofcode2023/day3"
 	"getmoredigital/adventofcode2023/day4"
 	"getmoredigital/adventofcode2023/day5"
+	"getmoredigital/adventofcode2023/day6"
 	"os"
 )
 
@@ -25,7 +26,9 @@ func main() {
 		day3.Main()
 	case "day4":
 		day4.Main()
-		case "day5":
-			day5.Main()
+	case "day5":
+		day5.Main()
+	case "day6":
+		day6.Main()
 	}
 }
