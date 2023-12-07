@@ -21,9 +21,8 @@ type Seed struct {
 }
 
 type Span struct {
-	Start  int
-	End    int
-	Length int
+	Start int
+	End   int
 }
 
 type ConvertMetric struct {
@@ -82,8 +81,6 @@ func parseData(filepath string) ([]int, map[string][]ConvertMetric) {
 					case 2:
 						target.End = target.Start + num
 						transformer.End = transformer.Start + num
-						target.Length = num
-						transformer.Length = num
 						metric := ConvertMetric{Target: target, Transformer: transformer}
 						convertMetrics[currentMap] = append(convertMetrics[currentMap], metric)
 					}
@@ -156,7 +153,8 @@ func makeSeeds(ids []int, convertMetrics map[string][]ConvertMetric) []Seed {
 }
 
 func Main() {
-	seedIds, convertMetrics := parseData("day5/day5.txt")
+	seedIds, cm := parseData("day5/day5.txt")
+	convertMetrics = cm
 	seeds := makeSeeds(seedIds, convertMetrics)
 	var lowest Seed
 	for _, seed := range seeds {
@@ -170,16 +168,22 @@ func Main() {
 		results := make(chan int, len(seedIds)/2)
 
 		for i := 0; i < len(seedIds); i += 2 {
-			go findLowestLocFromRange(seedIds[i], seedIds[i+1], convertMetrics, results)
+			go findLowestLocFromRange(seedIds[i], seedIds[i+1], results)
 		}
 
 		for i := 0; i < len(seedIds); i += 2 {
-			fmt.Printf("Result %d: %d\n", i+1, <-results)
+			fmt.Printf("Result %d: %d\n", (i/2)+1, <-results)
 		}
 
 		// Close the channel
 		close(results)
-
+		var lowest int
+		for result := range results {
+			if result < lowest || lowest == 0 {
+				lowest = result
+			}
+		}
+		fmt.Println("The lowest location for part 2 is", lowest)
 	}
 
 }
